@@ -24,7 +24,7 @@ return RectorConfig::configure()
         __DIR__.'/tests',
     ])
     ->withSkip([
-        __DIR__.'/app/Swagger',
+        __DIR__.'/app/OpenApi',
         ReturnBinaryOrToEarlyReturnRector::class,
     ])
     ->withParallel()

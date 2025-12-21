@@ -2,11 +2,12 @@
 
 <h1 align="center"><a href="https://frankenphp.dev"><img src="frankenphp.png" alt="FrankenPHP" width="400"></a></h1>
 
+## Благотворительный REST API для управления проектами и пожертвованиями
 
 (http://127.0.0.1/)
 
 Stack:
-- Laravel (Octane/FrankenPHP) 
+- Laravel 11 (Octane/FrankenPHP) - PHP 8.2+
 - PostgreSQL
 - Redis
 
@@ -27,47 +28,44 @@ APP_NAMESPACE=value # value - префикс к сервисам docker-compose
 ```
 3. Инициализация проекта:
 
-Makefile:
+
 ```bash
 make init
 ```
-Taskfile (https://taskfile.dev/docs/installation#get-the-binary):
-```bash
-task init
+
+
+## Особенности реализации
+
+### 1. PostgreSQL Триггер
+
+Автоматическая синхронизация денормализованного поля `donation_amount` в таблице `charity_projects`:
+
+```sql
+-- Функция триггера обновляет сумму при INSERT, UPDATE, DELETE пожертвований
+CREATE TRIGGER trigger_donations_insert
+AFTER INSERT ON donations
+FOR EACH ROW
+EXECUTE FUNCTION update_charity_project_donation_amount();
 ```
 
+### 2. moneyphp/money для работы с валютой
+
+### 3. HTML Санитизация - stevebauman/purify
 
 ## Commonly used tasks
 
 ```bash
-make/task exec # контейнер laravel
+make exec # контейнер laravel
 ```
 ```bash
-make/task up
+make up # поднять контейнеры для локальной разработки
 ```
 ```bash
-make/task stop
+make stop
 ```
 ```bash
-make/task tink
+make tink
 ```
 ```bash
-make/task check # проверка качества кода
+make check # проверка качества кода
 ```
-
-
-
-# Code quality: 
-```bash
-make check
-```
-или
-```bash
-task check
-```
-
-# About 
-
-
-
-Description

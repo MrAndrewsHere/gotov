@@ -1,0 +1,551 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Charity Project API",
+        "description": "REST API для управления благотворительными проектами и пожертвованиями. API предоставляет возможность получить список проектов, детальную информацию о конкретном проекте и создание пожертвований.",
+        "contact": {
+            "name": "API Support",
+            "email": "support@charity.ru"
+        },
+        "license": {
+            "name": "MIT"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Development Server"
+        },
+        {
+            "url": "https://api.charity.ru",
+            "description": "Production Server"
+        }
+    ],
+    "paths": {
+        "/v1/projects": {
+            "get": {
+                "tags": [
+                    "Charity Projects"
+                ],
+                "summary": "Список проектов",
+                "description": "Получить список всех благотворительных проектов с возможностью фильтрации и сортировки",
+                "operationId": "getCharityProjects",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Статус проекта (active, closed)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "closed"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "launch_date_from",
+                        "in": "query",
+                        "description": "Дата начала фильтрации (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "launch_date_to",
+                        "in": "query",
+                        "description": "Дата окончания фильтрации (Y-m-d)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Параметр сортировки",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "sort_order",
+                                "launch_date",
+                                "donation_amount"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "order",
+                        "in": "query",
+                        "description": "Направление сортировки",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "asc",
+                                "desc"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Количество элементов на странице (макс. 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 3
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Номер страницы",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно получен список проектов",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Помощь детям"
+                                            },
+                                            "slug": {
+                                                "type": "string",
+                                                "example": "help-children"
+                                            },
+                                            "short_description": {
+                                                "type": "string",
+                                                "example": "Программа поддержки нуждающихся детей"
+                                            },
+                                            "status": {
+                                                "properties": {
+                                                    "value": {
+                                                        "type": "string",
+                                                        "example": "active"
+                                                    },
+                                                    "label": {
+                                                        "type": "string",
+                                                        "example": "Активный"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            },
+                                            "launch_date": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "example": "2024-01-15 10:30:00"
+                                            },
+                                            "donation_amount": {
+                                                "properties": {
+                                                    "amount": {
+                                                        "type": "integer",
+                                                        "example": 50000
+                                                    },
+                                                    "currency": {
+                                                        "type": "string",
+                                                        "example": "RUB"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации параметров"
+                    }
+                }
+            }
+        },
+        "/v1/projects/{slug}": {
+            "get": {
+                "tags": [
+                    "Charity Projects"
+                ],
+                "summary": "Получить проект по slug",
+                "description": "Получить полную информацию о конкретном благотворительном проекте",
+                "operationId": "getCharityProjectBySlug",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Уникальный идентификатор проекта",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "help-children"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Успешно получена информация о проекте",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Помощь детям"
+                                        },
+                                        "slug": {
+                                            "type": "string",
+                                            "example": "help-children"
+                                        },
+                                        "short_description": {
+                                            "type": "string",
+                                            "example": "Программа поддержки нуждающихся детей"
+                                        },
+                                        "status": {
+                                            "properties": {
+                                                "value": {
+                                                    "type": "string",
+                                                    "example": "active"
+                                                },
+                                                "label": {
+                                                    "type": "string",
+                                                    "example": "Активный"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "launch_date": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2024-01-15 10:30:00"
+                                        },
+                                        "additional_description": {
+                                            "type": "string",
+                                            "example": "Подробное описание проекта..."
+                                        },
+                                        "donation_amount": {
+                                            "properties": {
+                                                "amount": {
+                                                    "type": "integer",
+                                                    "example": 50000
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "RUB"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Проект не найден"
+                    }
+                }
+            }
+        },
+        "/v1/donations": {
+            "post": {
+                "tags": [
+                    "Donations"
+                ],
+                "summary": "Создать пожертвование",
+                "description": "Создать новое пожертвование для благотворительного проекта",
+                "operationId": "createDonation",
+                "requestBody": {
+                    "description": "Данные пожертвования",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "charity_project_id",
+                                    "amount"
+                                ],
+                                "properties": {
+                                    "charity_project_id": {
+                                        "description": "ID благотворительного проекта",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "amount": {
+                                        "description": "Сумма пожертвования в рублях",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 1000.5
+                                    },
+                                    "donation_date": {
+                                        "description": "Дата пожертвования (опционально, по умолчанию - сегодня)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-12-20"
+                                    },
+                                    "comment": {
+                                        "description": "Комментарий к пожертвованию (опционально, макс. 1000 символов)",
+                                        "type": "string",
+                                        "example": "Помогу всем, чем смогу!"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Пожертвование успешно создано",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "charity_project_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "donation_date": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "example": "2024-12-20 14:30:00"
+                                        },
+                                        "amount": {
+                                            "properties": {
+                                                "amount": {
+                                                    "type": "integer",
+                                                    "example": 100050
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "RUB"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "comment": {
+                                            "type": "string",
+                                            "example": "Помогу всем, чем смогу!"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Ошибка валидации",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object"
+                                },
+                                "example": {
+                                    "message": "The given data was invalid.",
+                                    "errors": {
+                                        "charity_project_id": [
+                                            "ID проекта обязателен"
+                                        ],
+                                        "amount": [
+                                            "Сумма пожертвования обязательна"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Проект не найден"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ProjectStatus": {
+                "properties": {
+                    "value": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "active",
+                            "closed"
+                        ],
+                        "example": "active"
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Активный"
+                    }
+                },
+                "type": "object"
+            },
+            "Money": {
+                "properties": {
+                    "amount": {
+                        "description": "Сумма в копейках",
+                        "type": "integer",
+                        "example": 100050
+                    },
+                    "currency": {
+                        "description": "Код валюты (ISO 4217)",
+                        "type": "string",
+                        "example": "RUB"
+                    }
+                },
+                "type": "object"
+            },
+            "CharityProject": {
+                "title": "Благотворительный проект (краткая информация)",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Помощь детям"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "help-children"
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "example": "Программа поддержки нуждающихся детей"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/ProjectStatus"
+                    },
+                    "launch_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15 10:30:00"
+                    },
+                    "donation_amount": {
+                        "$ref": "#/components/schemas/Money"
+                    }
+                },
+                "type": "object"
+            },
+            "CharityProjectDetail": {
+                "title": "Благотворительный проект (полная информация)",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/CharityProject"
+                    },
+                    {
+                        "properties": {
+                            "additional_description": {
+                                "type": "string",
+                                "example": "Подробное описание проекта и его целей..."
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "Donation": {
+                "title": "Пожертвование",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "charity_project_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "donation_date": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-12-20 14:30:00"
+                    },
+                    "amount": {
+                        "$ref": "#/components/schemas/Money"
+                    },
+                    "comment": {
+                        "type": "string",
+                        "example": "Помогу всем, чем смогу!",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "title": "Ошибка валидации",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "type": "object",
+                        "example": {
+                            "field_name": [
+                                "Error message 1",
+                                "Error message 2"
+                            ]
+                        },
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Charity Projects",
+            "description": "API для работы с благотворительными проектами",
+            "externalDocs": {
+                "description": "Документация проекта",
+                "url": "https://github.com/MrAndrewsHere/gotov"
+            }
+        },
+        {
+            "name": "Donations",
+            "description": "API для работы с пожертвованиями",
+            "externalDocs": {
+                "description": "Документация проекта",
+                "url": "https://github.com/MrAndrewsHere/gotov"
+            }
+        }
+    ]
+}
